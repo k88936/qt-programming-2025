@@ -2,5 +2,9 @@
 <project version="4">
   <component name="VcsDirectoryMappings">
     <mapping directory="$PROJECT_DIR$" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/QRenderer2D" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/box2d" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/enkiTS" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/entt" vcs="Git" />
   </component>
 </project>
