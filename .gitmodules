@@ -9,4 +9,4 @@
 	url = git@github.com:k88936/entt.git
 [submodule "box2d"]
 	path = box2d
-	url = 
+	url = git@github.com:k88936/box2d.git
