@@ -1,0 +1,12 @@
+[submodule "QRenderer2D"]
+	path = QRenderer2D
+	url = .\\QRenderer2D\\
+[submodule "enkiTS"]
+	path = enkiTS
+	url = .\\enkiTS\\
+[submodule "entt"]
+	path = entt
+	url = .\\entt
+[submodule "box2d"]
+	path = box2d
+	url = .\\box2d\\
