@@ -1,12 +1,12 @@
 [submodule "QRenderer2D"]
 	path = QRenderer2D
-	url = .\\QRenderer2D\\
+	url = git@github.com:k88936/QRenderer2D.git
 [submodule "enkiTS"]
 	path = enkiTS
-	url = .\\enkiTS\\
+	url = git@github.com:k88936/enkiTS.git
 [submodule "entt"]
 	path = entt
-	url = .\\entt
+	url = git@github.com:k88936/entt.git
 [submodule "box2d"]
 	path = box2d
-	url = .\\box2d\\
+	url = 
