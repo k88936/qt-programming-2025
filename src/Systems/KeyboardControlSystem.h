@@ -1,0 +1,29 @@
+//
+// Created by kvtoD on 6/30/2025.
+//
+#ifndef KEYBOARDCONTROLSYSTEM_H
+#define KEYBOARDCONTROLSYSTEM_H
+#include "../Managers/EventManager.h"
+#include "System.h"
+#include "entt/signal/dispatcher.hpp"
+#include "../Events/KeyEvents.h"
+
+
+class KeyboardControlSystem final : public System<KeyboardControlSystem> {
+public:
+    entt::dispatcher keyboardEventsDispatcher;
+
+    void update() override;
+
+    void handleOnKeyEvent(const OnKey &event);
+
+    void handleAtKeyEvent(const AtKey &event);
+    void cleanInput();
+
+    KeyboardControlSystem();
+
+    ~KeyboardControlSystem() override;
+};
+
+
+#endif //KEYBOARDCONTROLSYSTEM_H
