@@ -12,9 +12,64 @@
 #include "../Events/KeyEvents.h"
 
 
-void KeyboardControlSystem::update() {
+void KeyboardControlSystem::update()
+{
+    cleanInput();
+
+    EventManager::getInstance().dispatcher.update<OnKey>();
+    EventManager::getInstance().dispatcher.update<AtKey>();
+}
+
+void KeyboardControlSystem::handleOnKeyEvent(const OnKey& event)
+{
+    for (const auto view = World::getInstance().registry.view<const Keymap, Input>();
+         const auto entity : view)
+    {
+        const auto& keymap = view.get<Keymap>(entity);
+        if (event.key == keymap.keyLeft)
+        {
+            view.get<Input>(entity).left = true;
+        }
+        else if (event.key == keymap.keyRight)
+        {
+            view.get<Input>(entity).right = true;
+        }
+        else if (event.key == keymap.keyDown)
+        {
+            view.get<Input>(entity).down = true;
+        }
+        else if (event.key == keymap.keyUp)
+        {
+            view.get<Input>(entity).up = true;
+        }
+        else if (event.key == keymap.keyAttack)
+        {
+            view.get<Input>(entity).attack = true;
+        }
+    }
+}
+
+void KeyboardControlSystem::handleAtKeyEvent(const AtKey& event)
+{
+    for (const auto view = World::getInstance().registry.view<const Keymap, Input>(); const auto entity : view)
+    {
+        const auto& keymap = view.get<Keymap>(entity);
+        switch (event.key)
+        {
+        // case keymap.keyAttack:
+        //     view.get<Input>(entity).attackOnce = true;
+        //     break;
+        // case keymap.keyUp:
+        default: ;
+        }
+    }
+}
+
+void KeyboardControlSystem::cleanInput()
+{
     auto view = World::getInstance().registry.view<Input>();
-    view.each([](Input &input) {
+    view.each([](Input& input)
+    {
         input.left = false;
         input.right = false;
         input.down = false;
@@ -22,48 +77,15 @@ void KeyboardControlSystem::update() {
         input.attack = false;
         input.attackOnce = false;
     });
-
-
-    EventManager::getInstance().dispatcher.update<OnKey>();
-    EventManager::getInstance().dispatcher.update<AtKey>();
 }
 
-void KeyboardControlSystem::handleOnKeyEvent(const OnKey &event) {
-    for (const auto view = World::getInstance().registry.view<const Keymap, Input>();
-         const auto entity: view) {
-        const auto &keymap = view.get<Keymap>(entity);
-        if (event.key == keymap.keyLeft) {
-            view.get<Input>(entity).left = true;
-        } else if (event.key == keymap.keyRight) {
-            view.get<Input>(entity).right = true;
-        } else if (event.key == keymap.keyDown) {
-            view.get<Input>(entity).down = true;
-        } else if (event.key == keymap.keyUp) {
-            view.get<Input>(entity).up = true;
-        } else if (event.key == keymap.keyAttack) {
-            view.get<Input>(entity).attack = true;
-        }
-    }
-}
-
-void KeyboardControlSystem::handleAtKeyEvent(const AtKey &event) {
-    for (const auto view = World::getInstance().registry.view<const Keymap, Input>(); const auto entity: view) {
-        const auto &keymap = view.get<Keymap>(entity);
-        switch (event.key) {
-            // case keymap.keyAttack:
-            //     view.get<Input>(entity).attackOnce = true;
-            //     break;
-            // case keymap.keyUp:
-            default: ;
-        }
-    }
-}
-
-KeyboardControlSystem::KeyboardControlSystem() {
+KeyboardControlSystem::KeyboardControlSystem()
+{
     EventManager::getInstance().dispatcher.sink<OnKey>().connect<&KeyboardControlSystem::handleOnKeyEvent>(this);
     EventManager::getInstance().dispatcher.sink<AtKey>().connect<&KeyboardControlSystem::handleAtKeyEvent>(this);
 }
 
-KeyboardControlSystem::~KeyboardControlSystem() {
+KeyboardControlSystem::~KeyboardControlSystem()
+{
     EventManager::getInstance().dispatcher.disconnect(this);
 }
