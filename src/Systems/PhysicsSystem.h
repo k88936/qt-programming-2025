@@ -18,7 +18,7 @@
 #include "box2d/types.h"
 
 
-class PhysicsSystem final : System<PhysicsSystem>
+class PhysicsSystem final :public System<PhysicsSystem>
 {
 public:
     b2WorldId worldId{};

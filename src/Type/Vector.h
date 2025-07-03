@@ -1,6 +1,7 @@
 #ifndef VECTOR_H
 #define VECTOR_H
 
+#include <QVector3D>
 #include "box2d/math_functions.h"
 
 class Vector : public b2Vec2 {
@@ -12,7 +13,7 @@ public:
     Vector(float x, float y) : b2Vec2{x, y} {
     }
 
-    Vector(const b2Vec2 &vec): b2Vec2(std::move(vec)) {
+    Vector(const b2Vec2 &vec): b2Vec2(vec) {
     };
 
     Vector(const b2Rot &rot): b2Vec2(rot.c, rot.s) {

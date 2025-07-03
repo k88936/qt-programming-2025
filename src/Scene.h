@@ -15,9 +15,12 @@ class Scene final : public QRenderer2D {
 public:
     Scene();
     void render(SpiritBatch &batch) override;
+    void timerEvent(QTimerEvent* event);
+    void startGameLoop();
 
     void keyReleaseEvent(QKeyEvent *event) override;
 
+    QBasicTimer timer;
     void keyPressEvent(QKeyEvent *event) override;
 };
 

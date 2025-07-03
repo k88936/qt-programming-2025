@@ -7,15 +7,9 @@
 #include "../Utils/Singletion.h"
 #include "entt/signal/dispatcher.hpp"
 
-class EventManager final : public Singleton<EventManager>, public entt::dispatcher {
+class EventManager final : public Singleton<EventManager>{
 public:
-    template<typename Type>
-    inline void update() {
-        entt::dispatcher::update<Type>();
-    }
-
-private:
-    void update();
+    entt::dispatcher dispatcher;
 };
 
 

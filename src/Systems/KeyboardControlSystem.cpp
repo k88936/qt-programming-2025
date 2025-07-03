@@ -24,8 +24,8 @@ void KeyboardControlSystem::update() {
     });
 
 
-    EventManager::getInstance().update<OnKey>();
-    EventManager::getInstance().update<AtKey>();
+    EventManager::getInstance().dispatcher.update<OnKey>();
+    EventManager::getInstance().dispatcher.update<AtKey>();
 }
 
 void KeyboardControlSystem::handleOnKeyEvent(const OnKey &event) {
@@ -60,10 +60,10 @@ void KeyboardControlSystem::handleAtKeyEvent(const AtKey &event) {
 }
 
 KeyboardControlSystem::KeyboardControlSystem() {
-    EventManager::getInstance().sink<OnKey>().connect<&KeyboardControlSystem::handleOnKeyEvent>(this);
-    EventManager::getInstance().sink<AtKey>().connect<&KeyboardControlSystem::handleAtKeyEvent>(this);
+    EventManager::getInstance().dispatcher.sink<OnKey>().connect<&KeyboardControlSystem::handleOnKeyEvent>(this);
+    EventManager::getInstance().dispatcher.sink<AtKey>().connect<&KeyboardControlSystem::handleAtKeyEvent>(this);
 }
 
 KeyboardControlSystem::~KeyboardControlSystem() {
-    EventManager::getInstance().disconnect(this);
+    EventManager::getInstance().dispatcher.disconnect(this);
 }

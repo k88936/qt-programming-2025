@@ -4,12 +4,12 @@
 
 #ifndef STATE_H
 #define STATE_H
-enum state
+enum StateType
 {
     Idle,Moving,Jump,Falling,Attack,Dead, Hurt
 };
 struct State
 {
-    state currentState = Idle;
+    StateType currentState = Idle;
 };
 #endif //STATE_H

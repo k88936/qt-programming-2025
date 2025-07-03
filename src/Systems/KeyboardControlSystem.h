@@ -11,8 +11,6 @@
 
 class KeyboardControlSystem final : public System<KeyboardControlSystem> {
 public:
-    entt::dispatcher keyboardEventsDispatcher;
-
     void update() override;
 
     void handleOnKeyEvent(const OnKey &event);

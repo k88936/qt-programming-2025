@@ -21,12 +21,12 @@ add_executable(lucknight src/main.cpp
         src/Utils/Singletion.cpp
         src/Managers/EventManager.cpp
         src/Systems/KeyboardControlSystem.cpp
+        src/Systems/StateMachineSystem.cpp
         src/World.cpp
         src/Prefab/Prefab.cpp
         src/Prefab/Player.cpp
         src/Scene.cpp
         src/Systems/PhysicsSystem.cpp
-        src/Components/State.h
 )
 target_link_libraries(lucknight
 
