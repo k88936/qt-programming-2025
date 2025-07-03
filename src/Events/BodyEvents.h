@@ -6,11 +6,11 @@
 #define BODYEVENTS_H
 #include "entt/entity/entity.hpp"
 
-struct BodyCreation {
-    entt::entity entity;
-};
-
-struct BodyDestruction {
-    entt::entity entity;
-};
+// struct BodyCreation {
+//     entt::entity entity;
+// };
+//
+// struct BodyDestruction {
+//     entt::entity entity;
+// };
 #endif //BODYEVENTS_H

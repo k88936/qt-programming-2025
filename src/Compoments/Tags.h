@@ -5,7 +5,11 @@
 #ifndef TAGS_H
 #define TAGS_H
 
-struct TagCreation {
+struct TagCreation
+{
+};
 
+struct TagDestruction
+{
 };
 #endif //TAGS_H
