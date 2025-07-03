@@ -5,8 +5,8 @@
 #include "KeyboardControlSystem.h"
 
 #include "../Managers/EventManager.h"
-#include "../Compoments/Input.h"
-#include "../Compoments/Keymap.h"
+#include "../Components/Input.h"
+#include "../Components/Keymap.h"
 #include "../World.h"
 #include "entt/entity/view.hpp"
 #include "../Events/KeyEvents.h"

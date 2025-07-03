@@ -7,7 +7,7 @@
 #include <qvariant.h>
 
 #include "../World.h"
-#include "../Compoments/Transform.h"
+#include "../Components/Transform.h"
 #include "entt/entity/registry.hpp"
 
 entt::entity Prefab::build(const Matrix &transform) {

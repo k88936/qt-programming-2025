@@ -26,6 +26,7 @@ add_executable(lucknight src/main.cpp
         src/Prefab/Player.cpp
         src/Scene.cpp
         src/Systems/PhysicsSystem.cpp
+        src/Components/State.h
 )
 target_link_libraries(lucknight
 

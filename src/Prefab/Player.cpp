@@ -4,14 +4,15 @@
 
 #include "Player.h"
 
+#include "Texture.h"
 #include "../World.h"
-#include "../Compoments/Body.h"
-#include "../Compoments/Drawable.h"
-#include "../Compoments/Keymap.h"
-#include "../Compoments/Input.h"
-#include "../Compoments/Output.h"
-#include "../Compoments/PhysicsDesciption.h"
-#include "../Compoments/Tags.h"
+#include "../Components/Body.h"
+#include "../Components/Drawable.h"
+#include "../Components/Keymap.h"
+#include "../Components/Input.h"
+#include "../Components/Output.h"
+#include "../Components/PhysicsDesciption.h"
+#include "../Components/Tags.h"
 #include "../Events/BodyEvents.h"
 #include "../Managers/EventManager.h"
 #include "box2d/box2d.h"
@@ -21,6 +22,7 @@ struct Input;
 struct Keymap;
 
 entt::entity Player::build(const Matrix &transform) {
+    const auto t = new Texture(QImage("assets/test.png"), 1, true, 1);
     const auto entity = Prefab::build(transform);
     auto &registry = World::getInstance().registry;
     registry.emplace<TagCreation>(entity);
@@ -37,7 +39,7 @@ entt::entity Player::build(const Matrix &transform) {
                                           });
     registry.emplace<Keymap>(entity, Keymap{Key_A, Key_D, Key_W, Key_S, Key_F});
     registry.emplace<Input>(entity);
-    registry.emplace<Drawable>(entity);
+    registry.emplace<Drawable>(entity,Drawable{.texture = t});
     registry.emplace<Output>(entity);
     return entity;
 }

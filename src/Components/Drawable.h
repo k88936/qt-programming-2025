@@ -6,6 +6,6 @@
 #define DRAWABLE_H
 
 struct Drawable {
-    // Texture texture;
+    Texture* texture;
 };
 #endif //DRAWABLE_H
