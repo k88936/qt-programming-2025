@@ -2,7 +2,7 @@
 # Body.h
 Body contains the handle for box2d
 # Drawable.h
-Drawable contains the handle of a texture for rendering
+Drawable contains the handle of the texture for rendering
 # Input.h
 Input describes the input command from the player (or ai)
 # Output.h
