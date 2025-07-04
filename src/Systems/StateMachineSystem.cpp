@@ -4,6 +4,7 @@
 
 #include "StateMachineSystem.h"
 #include "../Events/BodyEvents.h"
+#include  "../Components/Input.h"
 #include <unordered_map>
 
 #include "../Managers/EventManager.h"
@@ -120,10 +121,11 @@ bool StateMachineSystem::isMovingHorizontally(const Input& input)
     return input.left || input.right;
 }
 
-void StateMachineSystem::updateEntityState(entt::entity entity, const Input& input, Output& output, State& state)
+
+void StateMachineSystem::updateEntityState(const entt::entity entity, const Input& input, Output& output, State& state)
 {
     // Previous state for transition logic
-    StateType previousState = state.currentState;
+    const StateType previousState = state.currentState;
 
     // State transitions
     switch (previousState)
@@ -219,7 +221,9 @@ void StateMachineSystem::updateEntityState(entt::entity entity, const Input& inp
     // If state changed, emit a state change event
     if (previousState != state.currentState)
     {
-        EventManager::getInstance().dispatcher.enqueue<StateChangeEvent>(
+        // std::cout << input << std::endl;
+        // std::cout << "State change: " << previousState << " -> " << state.currentState << std::endl;
+        EventManager::getInstance().dispatcher.trigger<StateChangeEvent>(
             StateChangeEvent{.entity = entity, .previousState = previousState, .newState = state.currentState});
     }
 }

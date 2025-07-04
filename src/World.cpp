@@ -4,9 +4,12 @@
 
 #include "World.h"
 
+#include "Systems/AnimatorSystem.h"
+
 void World::loop()
 {
     KeyboardControlSystem::getInstance().update();
     StateMachineSystem::getInstance().update();
+    AnimatorSystem::getInstance().update();
     PhysicsSystem::getInstance().update();
 }

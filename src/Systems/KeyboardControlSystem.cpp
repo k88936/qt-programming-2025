@@ -10,17 +10,18 @@
 #include "../World.h"
 #include "entt/entity/view.hpp"
 #include "../Events/KeyEvents.h"
+#include "../Utils/Dumper.h"
 
 
 void KeyboardControlSystem::update()
 {
-    cleanInput();
-
-    EventManager::getInstance().dispatcher.update<OnKey>();
-    EventManager::getInstance().dispatcher.update<AtKey>();
+    // cleanInput();
+    // EventManager::getInstance().dispatcher.update<PressKey>();
+    // EventManager::getInstance().dispatcher.update<ReleaseKey>();
+    // dump<Input>();
 }
 
-void KeyboardControlSystem::handleOnKeyEvent(const OnKey& event)
+void KeyboardControlSystem::handlePressKeyEvent(const PressKey& event)
 {
     for (const auto view = World::getInstance().registry.view<const Keymap, Input>();
          const auto entity : view)
@@ -49,18 +50,30 @@ void KeyboardControlSystem::handleOnKeyEvent(const OnKey& event)
     }
 }
 
-void KeyboardControlSystem::handleAtKeyEvent(const AtKey& event)
+void KeyboardControlSystem::handleReleaseKeyEvent(const ReleaseKey& event)
 {
     for (const auto view = World::getInstance().registry.view<const Keymap, Input>(); const auto entity : view)
     {
         const auto& keymap = view.get<Keymap>(entity);
-        switch (event.key)
+        if (event.key == keymap.keyLeft)
         {
-        // case keymap.keyAttack:
-        //     view.get<Input>(entity).attackOnce = true;
-        //     break;
-        // case keymap.keyUp:
-        default: ;
+            view.get<Input>(entity).left = false;
+        }
+        else if (event.key == keymap.keyRight)
+        {
+            view.get<Input>(entity).right = false;
+        }
+        else if (event.key == keymap.keyDown)
+        {
+            view.get<Input>(entity).down = false;
+        }
+        else if (event.key == keymap.keyUp)
+        {
+            view.get<Input>(entity).up = false;
+        }
+        else if (event.key == keymap.keyAttack)
+        {
+            view.get<Input>(entity).attack = false;
         }
     }
 }
@@ -81,8 +94,9 @@ void KeyboardControlSystem::cleanInput()
 
 KeyboardControlSystem::KeyboardControlSystem()
 {
-    EventManager::getInstance().dispatcher.sink<OnKey>().connect<&KeyboardControlSystem::handleOnKeyEvent>(this);
-    EventManager::getInstance().dispatcher.sink<AtKey>().connect<&KeyboardControlSystem::handleAtKeyEvent>(this);
+    EventManager::getInstance().dispatcher.sink<PressKey>().connect<&KeyboardControlSystem::handlePressKeyEvent>(this);
+    EventManager::getInstance().dispatcher.sink<ReleaseKey>().connect<&
+        KeyboardControlSystem::handleReleaseKeyEvent>(this);
 }
 
 KeyboardControlSystem::~KeyboardControlSystem()

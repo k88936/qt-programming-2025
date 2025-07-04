@@ -4,8 +4,9 @@
 
 #ifndef DRAWABLE_H
 #define DRAWABLE_H
+#include "Texture.h"
 
 struct Drawable {
-    Texture* texture;
+    Texture* texture = nullptr;
 };
 #endif //DRAWABLE_H

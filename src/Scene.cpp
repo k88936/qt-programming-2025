@@ -21,6 +21,7 @@ void Scene::render(SpiritBatch& batch)
         const Drawable& drawable,
         const Transform& transform)
         {
+            assert(drawable.texture);
             batch.draw(*drawable.texture, transform.matrix);
         });
 }
@@ -41,7 +42,7 @@ void Scene::startGameLoop()
 
 void Scene::keyReleaseEvent(QKeyEvent* event)
 {
-    EventManager::getInstance().dispatcher.enqueue(AtKey{static_cast<Key>(event->key())});
+    EventManager::getInstance().dispatcher.trigger(ReleaseKey{static_cast<Key>(event->key())});
 }
 
 Scene::Scene()
@@ -51,5 +52,5 @@ Scene::Scene()
 
 void Scene::keyPressEvent(QKeyEvent* event)
 {
-    EventManager::getInstance().dispatcher.enqueue(OnKey{static_cast<Key>(event->key())});
+    EventManager::getInstance().dispatcher.trigger(PressKey{static_cast<Key>(event->key())});
 }

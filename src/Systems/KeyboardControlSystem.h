@@ -13,9 +13,9 @@ class KeyboardControlSystem final : public System<KeyboardControlSystem> {
 public:
     void update() override;
 
-    void handleOnKeyEvent(const OnKey &event);
+    void handlePressKeyEvent(const PressKey &event);
 
-    void handleAtKeyEvent(const AtKey &event);
+    void handleReleaseKeyEvent(const ReleaseKey &event);
     void cleanInput();
 
     KeyboardControlSystem();

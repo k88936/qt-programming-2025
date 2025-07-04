@@ -8,12 +8,12 @@
 
 // using Qt::Key;
 typedef Qt::Key Key;
-struct OnKey {
+struct PressKey {
     Key key;
     // Constructor that auto-converts from Qt key
 };
 
-struct AtKey {
+struct ReleaseKey {
     Key key;
     // Constructor that auto-converts from Qt key
 };

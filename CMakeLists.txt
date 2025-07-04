@@ -20,8 +20,10 @@ add_executable(lucknight src/main.cpp
         src/Systems/System.cpp
         src/Utils/Singletion.cpp
         src/Managers/EventManager.cpp
+        src/Managers/TextureManager.cpp
         src/Systems/KeyboardControlSystem.cpp
         src/Systems/StateMachineSystem.cpp
+        src/Systems/AnimatorSystem.cpp
         src/World.cpp
         src/Prefab/Prefab.cpp
         src/Prefab/Player.cpp

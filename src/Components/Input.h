@@ -5,7 +5,8 @@
 #ifndef INPUT_H
 #define INPUT_H
 
-struct Input {
+struct Input
+{
     bool left;
     bool right;
     bool up;
@@ -14,4 +15,10 @@ struct Input {
     bool attackOnce;
 };
 
+inline std::ostream &operator<<(std::ostream &os, const Input &input)
+{
+    os << "Input{left=" << input.left << ", right=" << input.right << ", up=" << input.up << ", down=" << input.down <<
+        ", attack=" << input.attack << "}";
+    return os;
+}
 #endif //INPUT_H
