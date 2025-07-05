@@ -3,7 +3,6 @@
 //
 
 #include "StateMachineSystem.h"
-#include "../Events/BodyEvents.h"
 #include  "../Components/Input.h"
 #include <unordered_map>
 
@@ -54,7 +53,10 @@ void StateMachineSystem::handleGroundContact(const GroundContactEvent& event)
 
                 // Emit state change event
                 EventManager::getInstance().dispatcher.enqueue<StateChangeEvent>(
-                    event.entity, currentState, state.currentState);
+                    StateChangeEvent{.entity = event.entity, 
+                                     .previousState = currentState, 
+                                     .newState = state.currentState, 
+                    });
             }
             else
             {
@@ -69,7 +71,10 @@ void StateMachineSystem::handleGroundContact(const GroundContactEvent& event)
 
             // Emit state change event
             EventManager::getInstance().dispatcher.enqueue<StateChangeEvent>(
-                event.entity, currentState, state.currentState);
+                StateChangeEvent{.entity = event.entity, 
+                                 .previousState = currentState, 
+                                 .newState = state.currentState, 
+                });
         }
     }
 }
@@ -87,16 +92,16 @@ void StateMachineSystem::update()
     auto& registry = World::getInstance().registry;
 
     // Get all entities with required components for state machine
-    auto view = registry.view<Input, Output, State>();
+    auto view = registry.view< const Input, Output,Transform, State>();
 
-    view.each([this](const auto entity, const auto& input, auto& output, auto& state)
+    view.each([this](const entt::entity entity, const Input& input, Output& output,Transform& transform, auto& state)
     {
         // Reset output forces/impulses
         output.reset();
         // Update entity state based on input and current conditions
-        updateEntityState(entity, input, output, state);
+        updateEntityState(entity, input,  state);
         // Apply output based on current state
-        applyStateBasedOutput(state, input, output);
+        applyStateBasedOutput(state, input, output,transform);
     });
 }
 
@@ -122,7 +127,7 @@ bool StateMachineSystem::isMovingHorizontally(const Input& input)
 }
 
 
-void StateMachineSystem::updateEntityState(const entt::entity entity, const Input& input, Output& output, State& state)
+void StateMachineSystem::updateEntityState(const entt::entity entity, const Input& input, State& state)
 {
     // Previous state for transition logic
     const StateType previousState = state.currentState;
@@ -224,11 +229,14 @@ void StateMachineSystem::updateEntityState(const entt::entity entity, const Inpu
         // std::cout << input << std::endl;
         // std::cout << "State change: " << previousState << " -> " << state.currentState << std::endl;
         EventManager::getInstance().dispatcher.trigger<StateChangeEvent>(
-            StateChangeEvent{.entity = entity, .previousState = previousState, .newState = state.currentState});
+            StateChangeEvent{.entity = entity, 
+                             .previousState = previousState, 
+                             .newState = state.currentState, 
+            });
     }
 }
 
-void StateMachineSystem::applyStateBasedOutput(const State& state, const Input& input, Output& output)
+void StateMachineSystem::applyStateBasedOutput(const State& state, const Input& input, Output& output, Transform& transform)
 {
     switch (state.currentState)
     {
@@ -240,10 +248,12 @@ void StateMachineSystem::applyStateBasedOutput(const State& state, const Input& 
         // Apply horizontal movement force
         if (input.left)
         {
+            transform.matrix.updateFlip(-1);
             output.force = {-MOVE_FORCE, 0};
         }
         if (input.right)
         {
+            transform.matrix.updateFlip(1);
             output.force = {MOVE_FORCE, 0};
         }
         break;

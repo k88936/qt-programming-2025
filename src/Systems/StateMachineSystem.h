@@ -10,12 +10,8 @@
 #include "../Components/Input.h"
 #include "../Components/Output.h"
 #include "../Components/State.h"
-#include "../Components/PhysicsDesciption.h"
+#include "../Components/Transform.h"
 #include "../Events/StateEvents.h"
-#include <entt/signal/dispatcher.hpp>
-
-// Forward declarations
-class BodyState;
 
 class StateMachineSystem final : public System<StateMachineSystem> {
 public:
@@ -35,9 +31,9 @@ private:
     // Check if entity is moving horizontally
     bool isMovingHorizontally(const Input& input);
     // Apply state transitions and update output
-    void updateEntityState(entt::entity entity, const Input& input, Output& output, State& state);
+    void updateEntityState(entt::entity entity, const Input& input, State& state);
     // Apply outputs based on current state
-    void applyStateBasedOutput(const State& state, const Input& input, Output& output);
+    void applyStateBasedOutput(const State& state, const Input& input, Output& output, Transform& transform);
 };
 
 #endif //STATEMACHINESYSTEM_H

@@ -52,8 +52,8 @@ void PhysicsSystem::syncData()
     view.each([](const entt::entity& entity, const Body& body, Transform& transform)
     {
         auto& bodyId = body.bodyID;
-        // transform.matrix.updateTransform(b2Body_GetTransform(bodyId));
-        transform.matrix = Matrix(b2Body_GetTransform(bodyId));
+        transform.matrix.updateTransform(b2Body_GetTransform(bodyId));
+        // transform.matrix = Matrix(b2Body_GetTransform(bodyId));
     });
 }
 

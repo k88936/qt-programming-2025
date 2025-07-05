@@ -261,17 +261,7 @@ void AnimatorSystem::onStateChange(const StateChangeEvent& event)
     }
 }
 
-void AnimatorSystem::setDirection(entt::entity entity, int direction)
-{
-    auto& registry = World::getInstance().registry;
-    if (!registry.all_of<Animation>(entity))
-    {
-        return;
-    }
-
-    auto& anim = registry.get<Animation>(entity);
-    anim.direction = (direction >= 0) ? 1 : -1;
-}
+// setDirection method has been moved to StateMachineSystem
 
 // void AnimatorSystem::initializeEntity(entt::entity entity)
 // {

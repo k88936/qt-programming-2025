@@ -48,9 +48,6 @@ public:
     // Handle state change events
     void onStateChange(const StateChangeEvent& event);
 
-    // Set the direction of the entity animation (for flipping sprites)
-    void setDirection(entt::entity entity, int direction);
-
 private:
     // Update animation based on elapsed time
     void updateAnimation(entt::entity entity, Animation& anim, float deltaTime);

@@ -88,17 +88,4 @@ void Player::initializeAnimations(entt::entity entity)
         animator.play(entity, "idle");
     }
 
-    // Set initial direction based on input (if any)
-    if (registry.all_of<Input>(entity))
-    {
-        auto& input = registry.get<Input>(entity);
-        if (input.right)
-        {
-            animator.setDirection(entity, 1);
-        }
-        else if (input.left)
-        {
-            animator.setDirection(entity, -1);
-        }
-    }
 }

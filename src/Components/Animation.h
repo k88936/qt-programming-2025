@@ -42,15 +42,11 @@ struct AnimationState {
 
 // Animation component for entities
 struct Animation {
-
     // Map from entity state to animation clips
     std::unordered_map<StateType, AnimationClip> stateAnimations;
 
     // Current animation state
     AnimationState current;
-
-    // Direction for sprite (1 = right, -1 = left)
-    int direction = 1;
 };
 
 #endif //ANIMATION_H

@@ -32,7 +32,7 @@ public:
     {
     }
 
-    void updateFlip(const float)
+    void updateFlip(const float flip)
     {
         this->flip = flip;
     }
@@ -40,24 +40,24 @@ public:
     void updateTransform(const b2Transform& transform)
     {
         (*this)(0, 0) = flip * transform.q.c;
-        (*this)(0,1)= flip * transform.q.s;
-        (*this)(0,2) = 0;
-        (*this)(0,3) = transform.p.x;
+        (*this)(0, 1) = flip * transform.q.s;
+        (*this)(0, 2) = 0;
+        (*this)(0, 3) = transform.p.x;
 
-        (*this)(1, 0) = -flip * transform.q.s;
-        (*this)(1,1) = flip * transform.q.c;
-        (*this)(1,2) = 0;
-        (*this)(1,3) = transform.p.y;
+        (*this)(1, 0) = -transform.q.s;
+        (*this)(1, 1) = transform.q.c;
+        (*this)(1, 2) = 0;
+        (*this)(1, 3) = transform.p.y;
 
-        (*this)(2, 0)= 0;
-        (*this)(2,1)= 0;
-        (*this)(2,2) = 1;
-        (*this)(2,3) = 0;
+        (*this)(2, 0) = 0;
+        (*this)(2, 1) = 0;
+        (*this)(2, 2) = 1;
+        (*this)(2, 3) = 0;
 
         (*this)(3, 0) = 0;
-        (*this)(3,1)= 0;
-        (*this)(3,2) = 0;
-        (*this)(3,3) = 1;
+        (*this)(3, 1) = 0;
+        (*this)(3, 2) = 0;
+        (*this)(3, 3) = 1;
     }
 
 
@@ -66,7 +66,6 @@ public:
     {
         return Vector(column(3).x(), column(3).y(), column(3).z());
     }
-
 
     // 获取旋转（提取Z轴旋转角度）
     Vector getRotation() const
