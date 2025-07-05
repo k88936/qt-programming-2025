@@ -4,6 +4,8 @@
 
 #ifndef DUMPER_H
 #define DUMPER_H
+#include <sstream>
+
 #include "../World.h"
 
 

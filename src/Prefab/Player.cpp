@@ -18,6 +18,7 @@
 #include "../Events/KeyEvents.h"
 #include "../Systems/AnimatorSystem.h"
 #include "../Managers/EventManager.h"
+#include "../Scripts/PlayerScript.h"
 
 struct Input;
 struct Keymap;
@@ -48,6 +49,7 @@ entt::entity Player::build(const Matrix& transform)
     registry.emplace<State>(entity);
     registry.emplace<Drawable>(entity, Drawable{.texture = nullptr});
     registry.emplace<Animation>(entity);
+    registry.emplace<PlayerScript>(entity);
     initializeAnimations(entity);
 
     return entity;
@@ -87,5 +89,4 @@ void Player::initializeAnimations(entt::entity entity)
         // Default to idle if no state component
         animator.play(entity, "idle");
     }
-
 }

@@ -13,7 +13,6 @@ public:
     ~Player() override = default;
     entt::entity build(const Matrix &transform = Matrix()) override;
     void initializeAnimations(entt::entity entity);
-
 private:
     // Initialize animations for the player entity
 };

@@ -16,6 +16,7 @@
 #include "Components/Transform.h"
 #include "Events/BodyEvents.h"
 #include "Prefab/Player.h"
+#include "Scripts/PlayerScript.h"
 #include "Systems/PhysicsSystem.h"
 
 int main(int argc, char* argv[])
