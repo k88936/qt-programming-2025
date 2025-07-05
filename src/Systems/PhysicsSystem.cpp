@@ -52,7 +52,8 @@ void PhysicsSystem::syncData()
     view.each([](const entt::entity& entity, const Body& body, Transform& transform)
     {
         auto& bodyId = body.bodyID;
-        transform.matrix = b2Body_GetTransform(bodyId);
+        // transform.matrix.updateTransform(b2Body_GetTransform(bodyId));
+        transform.matrix = Matrix(b2Body_GetTransform(bodyId));
     });
 }
 
@@ -102,7 +103,7 @@ void PhysicsSystem::createBody() const
             bodyDef.isBullet = movementDesc->isBullet;
             bodyDef.linearDamping = movementDesc->linearDamping;
             bodyDef.motionLocks.angularZ = movementDesc->rotationLocked;
-            bodyDef.position = transform.matrix.p;
+            bodyDef.position = transform.matrix.getPosition();
             bodyDef.userData = EntityWrapper(entity);
         }
         else
@@ -118,8 +119,8 @@ void PhysicsSystem::createBody() const
         {
             shapeDef.material.friction = capsuleDesc->material.friction;
             const b2Capsule shape = {
-                .center1 = transform.matrix.p + Vector{0, capsuleDesc->halfHeight},
-                .center2 = transform.matrix.p - Vector{0, -capsuleDesc->halfHeight},
+                .center1 = transform.matrix.getPosition() + Vector{0, capsuleDesc->halfHeight},
+                .center2 = transform.matrix.getPosition() - Vector{0, -capsuleDesc->halfHeight},
                 .radius = capsuleDesc->radius
             };
             shapeId = b2CreateCapsuleShape(bodyId, &shapeDef, &shape);
@@ -127,8 +128,8 @@ void PhysicsSystem::createBody() const
         else if (const auto& boxDesc = registry.try_get<PhysicsDes_BoxShapeDesc>(entity))
         {
             shapeDef.material.friction = boxDesc->material.friction;
-            const b2Polygon shape = b2MakeOffsetBox(boxDesc->halfWidth, boxDesc->halfHeight, transform.matrix.p,
-                                                    transform.matrix.q);
+            const b2Polygon shape = b2MakeOffsetBox(boxDesc->halfWidth, boxDesc->halfHeight, transform.matrix.getPosition(),
+                                                    transform.matrix.getRotation());
 
             shapeId = b2CreatePolygonShape(bodyId, &shapeDef, &shape);
         }
@@ -199,7 +200,7 @@ void PhysicsSystem::step() const
 PhysicsSystem::~PhysicsSystem()
 {
     b2DestroyWorld(worldId);
-    for (const auto & task : tasks)
+    for (const auto& task : tasks)
     {
         enkiDeleteTaskSet(scheduler, task);
     }

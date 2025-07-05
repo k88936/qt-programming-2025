@@ -2,87 +2,77 @@
 #define VECTOR_H
 
 #include <QVector3D>
+#include <iostream>
+#include <cmath>
+
 #include "box2d/math_functions.h"
 
-class Vector : public b2Vec2 {
+class Vector : public QVector3D
+{
 public:
     // 构造函数
-    Vector() : b2Vec2{0.0f, 0.0f} {
+    Vector() : QVector3D{0.0f, 0.0f, 0.0f}
+    {
     }
 
-    Vector(float x, float y) : b2Vec2{x, y} {
+    Vector(float x, float y) : QVector3D{x, y, 0.0f}
+    {
     }
 
-    Vector(const b2Vec2 &vec): b2Vec2(vec) {
-    };
-
-    Vector(const b2Rot &rot): b2Vec2(rot.c, rot.s) {
-    };
-
-    // 获取向量长度
-    float Length() const {
-        return b2Length(*this);
+    Vector(float x, float y, float z) : QVector3D{x, y, z}
+    {
     }
 
-    // 归一化向量
-    Vector Normalize() const {
-        return b2Normalize(*this);
+    Vector(const b2Vec2 vec): QVector3D(vec.x, vec.y, 0.0f)
+    {
     }
 
-    // 向量加法
-    Vector Add(const Vector &other) const {
-        return b2Add(*this, other);
+    Vector(const QVector3D& vec) : QVector3D(vec)
+    {
     }
 
-    // 向量减法
-    Vector Sub(const Vector &other) const {
-        return b2Sub(*this, other);
+
+    Vector operator +=(const Vector& rhs)
+    {
+        *this = *this + rhs;
+        return *this;
     }
 
-    // 标量乘法（成员函数）
-    Vector Scale(float scalar) const {
-        return b2MulSV(scalar, *this);
+    Vector operator -=(const Vector& rhs)
+    {
+        *this = *this - rhs;
+        return *this;
     }
 
-    // 点积
-    float Dot(const Vector &other) const {
-        return b2Dot(*this, other);
+    operator const b2Vec2() const
+    {
+        return b2Vec2(x(), y());
     }
 
-    // 叉积
-    float Cross(const Vector &other) const {
-        return b2Cross(*this, other);
+    operator const b2Rot() const
+    {
+        return b2Rot(x(), y());
     }
 
-    // 静态函数用于标量乘法（交换律）
-    static Vector Multiply(float scalar, const Vector &vec) {
-        return vec.Scale(scalar);
-    }
-
-    // 向量夹角
-    float AngleBetween(const Vector &other) const {
-        Vector a = this->Normalize();
-        Vector b = other.Normalize();
-        return acosf(a.Dot(b));
-    }
-
-    // 判断是否为零向量
-    bool IsZero() const {
-        return x == 0.0f && y == 0.0f;
-    }
-
-    // 是否有效
-    bool IsValid() const {
-        return b2IsValidVec2(*this);
-    }
-
-    operator QVector3D() {
-        constexpr float z = 0.0f;
-        return {x, y, z};
-    }
+    // operator const QVector3D() const
+    // {
+    //     return *this;
+    // }
 };
 
-inline std::ostream &operator<<(std::ostream &os, const Vector &vector) {
-    return os << "(x: " << vector.x << ", y: " << vector.y << ")";
+
+inline std::ostream& operator<<(std::ostream& os, const Vector& vector)
+{
+    return os << "(x: " << vector.x() << ", y: " << vector.y() << ", z:" << vector.z() << ")";
+}
+
+inline Vector operator+(const Vector& lhs, const Vector& rhs)
+{
+    return Vector(lhs.x() + rhs.x(), lhs.y() + rhs.y(), lhs.z() + rhs.z());
+}
+
+inline Vector operator-(const Vector& lhs, const Vector& rhs)
+{
+    return Vector(lhs.x() - rhs.x(), lhs.y() - rhs.y(), lhs.z() - rhs.z());
 }
 #endif //VECTOR_H

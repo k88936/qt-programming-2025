@@ -10,86 +10,84 @@
 #include "box2d/math_functions.h"
 
 
-class Matrix : public b2Transform {
+class Matrix : public QMatrix4x4
+{
 public:
+    float flip = 1;
     // 构造函数
-    Matrix() : b2Transform{{0.0f, 0.0f}, {1.0f, 0.0f}} {
-    } // 默认单位变换
-    Matrix(const b2Vec2 &position, const b2Rot &rotation) : b2Transform{position, rotation} {
+    Matrix()
+    {
+    } // 默认单位矩阵
+
+    Matrix(const QMatrix4x4& matrix) : QMatrix4x4{matrix}
+    {
     }
 
-    Matrix(const b2Transform &t) : b2Transform{t.p, t.q} {
+    explicit Matrix(const b2Transform& transform): QMatrix4x4{
+        transform.q.c, -transform.q.s, 0, transform.p.x,
+        transform.q.s, transform.q.c, 0, transform.p.y,
+        0, 0, 1, 0,
+        0, 0, 0, 1
+    }
+    {
     }
 
-
-    // 应用变换到点
-    Vector TransformPoint(const Vector &point) const {
-        return b2TransformPoint(*this, point);
+    void updateFlip(const float)
+    {
+        this->flip = flip;
     }
 
-    // 逆变换点
-    Vector InverseTransformPoint(const Vector &point) const {
-        return b2InvTransformPoint(*this, point);
+    void updateTransform(const b2Transform& transform)
+    {
+        (*this)(0, 0) = flip * transform.q.c;
+        (*this)(0,1)= flip * transform.q.s;
+        (*this)(0,2) = 0;
+        (*this)(0,3) = transform.p.x;
+
+        (*this)(1, 0) = -flip * transform.q.s;
+        (*this)(1,1) = flip * transform.q.c;
+        (*this)(1,2) = 0;
+        (*this)(1,3) = transform.p.y;
+
+        (*this)(2, 0)= 0;
+        (*this)(2,1)= 0;
+        (*this)(2,2) = 1;
+        (*this)(2,3) = 0;
+
+        (*this)(3, 0) = 0;
+        (*this)(3,1)= 0;
+        (*this)(3,2) = 0;
+        (*this)(3,3) = 1;
     }
 
-    // 组合变换（A * B）
-    Matrix Multiply(const Matrix &other) const {
-        return b2MulTransforms(*this, other);
-    }
 
     // 获取位置
-    Vector GetPosition() const {
-        return p;
+    Vector getPosition() const
+    {
+        return Vector(column(3).x(), column(3).y(), column(3).z());
     }
 
-    // 获取旋转
-    Vector GetRotation() const {
-        return q;
+
+    // 获取旋转（提取Z轴旋转角度）
+    Vector getRotation() const
+    {
+        return Vector((*this)(0, 0), (*this)(1, 0));
     }
 
-    // 设置位置
-    void SetPosition(const Vector &position) {
-        p = position;
-    }
-
-    // 设置旋转
-    void SetRotation(float radians) {
-        q = b2MakeRot(radians);
-    }
-
-    // 静态函数用于创建平移矩阵
-    static Matrix MakeTranslation(const Vector &translation) {
-        return Matrix(translation, b2Rot_identity);
-    }
-
-    // 静态函数用于创建旋转矩阵
-    static Matrix MakeRotation(float radians) {
-        return Matrix(b2Vec2_zero, b2MakeRot(radians));
-    }
-
-    // 是否有效
-    bool IsValid() const {
-        return b2IsValidTransform(*this);
-    }
-
-    operator QMatrix4x4() const {
-        constexpr float z = 0.0f;
-        float x = p.x;
-        float y = p.y;
-        float c = q.c;
-        float s = q.s;
-
-        return {
-            c, s, 0, x,
-            -s, c, 0, y,
-            0, 0, 1, z,
-            0, 0, 0, 1
-        };
+    operator const b2Transform() const
+    {
+        b2Transform result;
+        result.p.x = column(3).x();
+        result.p.y = column(3).y();
+        result.q.c = (*this)(0, 0);
+        result.q.s = (*this)(1, 0);
+        return result;
     }
 };
 
-inline std::ostream &operator <<(std::ostream &os, const Matrix &matrix) {
-    return os << "(position: " << matrix.GetPosition() << ", rotation: " << matrix.GetRotation() << ")";
+inline std::ostream& operator <<(std::ostream& os, const Matrix& matrix)
+{
+    return os << "(position: " << matrix.getPosition() << ", rotation: " << matrix.getRotation() << ")";
 }
 
 #endif //MATRIX_H

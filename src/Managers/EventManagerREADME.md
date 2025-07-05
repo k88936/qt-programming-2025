@@ -1,7 +1,3 @@
-# Managers
-
-managers are helpers for systems
-
 # EventManager
 
 EventManager is a singleton class that manages events in the game. Based on enTT event, It provides methods to subscribe

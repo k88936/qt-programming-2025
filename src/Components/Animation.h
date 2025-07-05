@@ -42,6 +42,7 @@ struct AnimationState {
 
 // Animation component for entities
 struct Animation {
+
     // Map from entity state to animation clips
     std::unordered_map<StateType, AnimationClip> stateAnimations;
 

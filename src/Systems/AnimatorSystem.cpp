@@ -12,7 +12,7 @@ long getCurrentTimeMilliseconds()
 {
     const auto now = std::chrono::high_resolution_clock::now();
     const auto duration = now.time_since_epoch();
-    const auto millis = std::chrono::duration_cast<std::chrono::milliseconds>(duration).count();
+    const long millis = std::chrono::duration_cast<std::chrono::milliseconds>(duration).count();
     return millis;
 }
 
@@ -33,13 +33,13 @@ void AnimatorSystem::update()
 {
     // Calculate delta time
     const long currentTime = getCurrentTimeMilliseconds();
-    float deltaTime = (currentTime - lastUpdateTime) / 1000.0f;
+    float deltaTime = static_cast<float>(currentTime - lastUpdateTime) / 1000.0f;
     lastUpdateTime = currentTime;
 
     auto& registry = World::getInstance().registry;
     auto view = registry.view<Animation, Drawable>();
 
-    view.each([this, deltaTime](auto entity, auto& anim, auto& drawable)
+    view.each([this, deltaTime](auto entity, Animation& anim, Drawable& drawable)
     {
         // First ensure entity has a texture if animations are available
         if (drawable.texture == nullptr && !anim.stateAnimations.empty())
@@ -349,11 +349,7 @@ void AnimatorSystem::updateAnimation(entt::entity entity, Animation& anim, float
 void AnimatorSystem::updateDrawableTexture(entt::entity entity, const Animation& anim)
 {
     auto& registry = World::getInstance().registry;
-    if (!registry.all_of<Drawable>(entity) || !anim.current.clip)
-    {
-        return;
-    }
-
+    assert(registry.all_of<Drawable>(entity) && anim.current.clip);
     auto& drawable = registry.get<Drawable>(entity);
 
     // Get the current frame index
@@ -363,19 +359,8 @@ void AnimatorSystem::updateDrawableTexture(entt::entity entity, const Animation&
     Texture* texture = TextureManager::getInstance().getTexture(
         anim.current.clip->basePath, frameIndex);
 
-    if (texture)
-    {
-        drawable.texture = texture;
-
-        // Handle sprite flipping based on direction
-        // This would need sprite rendering support for flipping
-        // For now, we just make a note of it
-        if (anim.direction < 0)
-        {
-            // In a real implementation, this would flip the sprite horizontally
-            // TODO: Implement sprite flipping in rendering system
-        }
-    }
+    assert(texture);
+    drawable.texture = texture;
 }
 
 std::string AnimatorSystem::getAnimationNameForState(StateType state)

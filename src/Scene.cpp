@@ -9,10 +9,6 @@
 #include "Components/Transform.h"
 #include "Events/KeyEvents.h"
 
-// void Scene::render(SpiritBatch &batch) {
-// }
-
-
 void Scene::render(SpiritBatch& batch)
 {
     auto& registry = World::getInstance().registry;

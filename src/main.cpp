@@ -23,7 +23,9 @@ int main(int argc, char* argv[])
     QApplication a(argc, argv);
 
     Player p;
-    p.build(Matrix::MakeTranslation({0, 1}));
+    Matrix m;
+    m.translate(0,1);
+    p.build(m);
 
     Scene scene;
     scene.show();

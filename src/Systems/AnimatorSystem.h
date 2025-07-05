@@ -51,9 +51,6 @@ public:
     // Set the direction of the entity animation (for flipping sprites)
     void setDirection(entt::entity entity, int direction);
 
-    // Initialize entity with default animations and textures
-    void initializeEntity(entt::entity entity);
-
 private:
     // Update animation based on elapsed time
     void updateAnimation(entt::entity entity, Animation& anim, float deltaTime);
