@@ -6,19 +6,14 @@
 #define ANIMATORSYSTEM_H
 
 #include "System.h"
-#include "../World.h"
+#include "../Core/World.h"
 #include "../Components/Animation.h"
-#include "../Components/Drawable.h"
 #include "../Components/State.h"
 #include "../Events/StateEvents.h"
-#include "../Managers/EventManager.h"
-#include "../Managers/TextureManager.h"
-#include "../Utils/FileUtils.h"
-
-#include <unordered_map>
 #include <string>
 
-class AnimatorSystem final : public System<AnimatorSystem> {
+class AnimatorSystem final : public System<AnimatorSystem>
+{
 public:
     AnimatorSystem();
     ~AnimatorSystem() override;
@@ -26,9 +21,9 @@ public:
     void update() override;
 
     // Register a state-based animation
-    bool registerAnimation(entt::entity entity, StateType state, 
-                          const std::string& basePath, 
-                          float frameDuration = 0.16f, bool loop = true);
+    bool registerAnimation(entt::entity entity, StateType state,
+                           const std::string& basePath,
+                           float frameDuration = 0.16f, bool loop = true);
 
     // Play a specific animation by name
     void play(entt::entity entity, const std::string& stateName);

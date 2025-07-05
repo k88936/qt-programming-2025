@@ -5,7 +5,7 @@
 #include "Player.h"
 
 #include "Texture.h"
-#include "../World.h"
+#include "../Core/World.h"
 #include "../Components/Drawable.h"
 #include "../Components/Keymap.h"
 #include "../Components/Input.h"
@@ -16,9 +16,9 @@
 #include "../Components/Tags.h"
 #include "../Events/BodyEvents.h"
 #include "../Events/KeyEvents.h"
-#include "../Systems/AnimatorSystem.h"
 #include "../Managers/EventManager.h"
 #include "../Scripts/PlayerScript.h"
+#include "../Systems/AnimatorSystem.h"
 
 struct Input;
 struct Keymap;

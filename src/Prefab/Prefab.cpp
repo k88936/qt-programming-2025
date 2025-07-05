@@ -6,7 +6,7 @@
 
 #include <qvariant.h>
 
-#include "../World.h"
+#include "../Core/World.h"
 #include "../Components/Transform.h"
 #include "entt/entity/registry.hpp"
 

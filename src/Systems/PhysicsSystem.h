@@ -6,7 +6,7 @@
 #define PHYSICSSYSTEM_H
 #include "System.h"
 #include "TaskScheduler_c.h"
-#include "../World.h"
+#include "../Core/World.h"
 #include "../Components/Body.h"
 #include "../Components/Transform.h"
 #include "../Components/Output.h"

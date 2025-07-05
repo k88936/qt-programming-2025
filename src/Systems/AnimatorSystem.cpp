@@ -4,6 +4,9 @@
 
 #include "AnimatorSystem.h"
 #include "../Managers/TextureManager.h"
+#include  "../Managers/EventManager.h"
+#include "../Components/Drawable.h"
+#include "../Utils/FileUtils.h"
 #include <chrono>
 #include <QDebug>
 

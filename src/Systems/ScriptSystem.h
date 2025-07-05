@@ -5,7 +5,7 @@
 #ifndef SCRIPTSYSTEM_H
 #define SCRIPTSYSTEM_H
 #include "System.h"
-#include "../World.h"
+#include "../Core/World.h"
 
 class ScriptSystem final : public System<ScriptSystem>
 {

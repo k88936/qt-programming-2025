@@ -6,7 +6,7 @@
 #define DUMPER_H
 #include <sstream>
 
-#include "../World.h"
+#include "../Core/World.h"
 
 
 inline std::ostream &operator <<(std::ostream &os, const entt::entity &entity) {

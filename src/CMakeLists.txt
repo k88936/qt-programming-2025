@@ -30,17 +30,6 @@ add_executable(lucknight src/main.cpp
         src/Systems/PhysicsSystem.cpp
         src/Systems/ScriptSystem.cpp
         src/Scripts/PlayerScript.cpp
+        src/Scripts/MonsterScript.cpp
+        src/Scripts/BulletScript.cpp
 )
-target_link_libraries(lucknight
-
-        Qt::Core
-        Qt::Gui
-        Qt::Widgets
-
-        QRenderer2D
-        box2d::box2d
-        EnTT::EnTT
-        enkiTS
-
-)
-

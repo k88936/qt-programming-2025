@@ -7,10 +7,9 @@
 
 #include <entt/entt.hpp>
 
-#include "Scene.h"
+#include "Core/Scene.h"
 #include "Systems/KeyboardControlSystem.h"
-#include "Systems/StateMachineSystem.h"
-#include "World.h"
+#include "Core/World.h"
 #include "Components/Drawable.h"
 #include "Components/PhysicsDesciption.h"
 #include "Components/Transform.h"

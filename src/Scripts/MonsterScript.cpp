@@ -1,51 +1,54 @@
 //
-// Created by root on 7/5/25.
+// Created on 7/5/25.
 //
 
-#include "PlayerScript.h"
+#include "MonsterScript.h"
 #include "../Core/World.h"
 #include "../Managers/EventManager.h"
 #include "../Components/Transform.h"
 
 #include <iostream>
 
-PlayerScript::PlayerScript()
+MonsterScript::MonsterScript()
 {
     // Subscribe to ground contact events
-    EventManager::getInstance().dispatcher.sink<GroundContactEvent>().connect<&PlayerScript::handleGroundContact>(this);
+    EventManager::getInstance().dispatcher.sink<GroundContactEvent>().connect<&MonsterScript::handleGroundContact>(this);
 }
 
-PlayerScript::~PlayerScript()
+MonsterScript::~MonsterScript()
 {
     // Disconnect from events when script is destroyed
-    EventManager::getInstance().dispatcher.sink<GroundContactEvent>().disconnect<&PlayerScript::handleGroundContact>(this);
+    EventManager::getInstance().dispatcher.sink<GroundContactEvent>().disconnect<&MonsterScript::handleGroundContact>(this);
 }
 
-void PlayerScript::update(entt::entity entity)
+void MonsterScript::update(entt::entity entity)
 {
     auto& registry = World::getInstance().registry;
 
     // Only process entities with required components
-    if (!registry.all_of<Input, Output, State>(entity)) {
+    if (!registry.all_of<Output, State>(entity)) {
         return;
     }
 
     // Get components
-    const auto& input = registry.get<Input>(entity);
     auto& output = registry.get<Output>(entity);
     auto& state = registry.get<State>(entity);
 
     // Reset output forces/impulses
     output.reset();
 
-    // Update entity state based on input and current conditions
-    updateEntityState(entity, input, state);
+    // Create AI-driven input
+    Input aiInput = {};
+    generateAIInput(entity, aiInput);
+
+    // Update entity state based on AI logic
+    updateEntityState(entity, state);
 
     // Apply output based on current state
-    applyStateBasedOutput(state, input, output, entity);
+    applyStateBasedOutput(state, output, entity);
 }
 
-void PlayerScript::handleGroundContact(const GroundContactEvent& event)
+void MonsterScript::handleGroundContact(const GroundContactEvent& event)
 {
     // Update grounded status in our tracking map
     groundedEntities[event.entity] = event.inContact;
@@ -59,32 +62,15 @@ void PlayerScript::handleGroundContact(const GroundContactEvent& event)
         // If entity just landed on ground
         if (event.inContact && (state.currentState == Jump || state.currentState == Falling))
         {
-            // Land on ground - transition to idle or moving based on input
-            if (registry.all_of<Input>(event.entity))
-            {
-                const auto& input = registry.get<Input>(event.entity);
-                StateType currentState = state.currentState;
+            StateType currentState = state.currentState;
+            state.currentState = Idle;
 
-                if (isMovingHorizontally(input))
-                {
-                    state.currentState = Moving;
-                }
-                else
-                {
-                    state.currentState = Idle;
-                }
-
-                // Emit state change event
-                EventManager::getInstance().dispatcher.enqueue<StateChangeEvent>(
-                    StateChangeEvent{.entity = event.entity, 
-                                     .previousState = currentState, 
-                                     .newState = state.currentState, 
-                    });
-            }
-            else
-            {
-                state.currentState = Idle;
-            }
+            // Emit state change event
+            EventManager::getInstance().dispatcher.enqueue<StateChangeEvent>(
+                StateChangeEvent{.entity = event.entity, 
+                                 .previousState = currentState, 
+                                 .newState = state.currentState, 
+                });
         }
         // If entity just left the ground and isn't jumping
         else if (!event.inContact && state.currentState != Jump)
@@ -102,7 +88,7 @@ void PlayerScript::handleGroundContact(const GroundContactEvent& event)
     }
 }
 
-bool PlayerScript::isGrounded(entt::entity entity)
+bool MonsterScript::isGrounded(entt::entity entity)
 {
     // Check if entity is in our tracking map and is grounded
     auto it = groundedEntities.find(entity);
@@ -116,44 +102,103 @@ bool PlayerScript::isGrounded(entt::entity entity)
     return true;
 }
 
-bool PlayerScript::isMovingHorizontally(const Input& input)
+void MonsterScript::generateAIInput(entt::entity entity, Input& aiInput)
 {
-    return input.left || input.right;
+    auto& registry = World::getInstance().registry;
+
+    // Find player position (this is a simple example - could be more sophisticated)
+    Vector playerPos;
+    Vector monsterPos;
+
+    bool foundPlayer = false;
+    bool hasTransform = registry.all_of<Transform>(entity);
+
+    if (hasTransform) {
+        monsterPos = registry.get<Transform>(entity).matrix.getPosition();
+
+        // Find the player (first entity with PlayerScript)
+        registry.view<PlayerScript>().each([&](auto playerEntity) {
+            if (registry.all_of<Transform>(playerEntity)) {
+                playerPos = registry.get<Transform>(playerEntity).matrix.getPosition();
+                foundPlayer = true;
+            }
+        });
+    }
+
+    // If we found player and have transforms, make AI decisions
+    if (foundPlayer && hasTransform) {
+        float distance = playerPos.x - monsterPos.x;
+        float absDistance = std::abs(distance);
+
+        // Set AI inputs based on player position
+        if (absDistance < attackRange) {
+            // Player is in attack range
+            aiInput.attack = true;
+        } else if (absDistance < detectionRange) {
+            // Player is detected but not in attack range - move toward player
+            aiInput.left = distance < 0;
+            aiInput.right = distance > 0;
+
+            // Occasionally jump if grounded
+            if (isGrounded(entity) && rand() % 100 < 5) {
+                aiInput.up = true;
+            }
+        } else {
+            // Random patrol behavior
+            int randomMove = rand() % 100;
+            if (randomMove < 30) {
+                aiInput.left = true;
+            } else if (randomMove < 60) {
+                aiInput.right = true;
+            }
+
+            // Occasionally jump
+            if (isGrounded(entity) && rand() % 100 < 2) {
+                aiInput.up = true;
+            }
+        }
+    }
 }
 
-void PlayerScript::updateEntityState(const entt::entity entity, const Input& input, State& state)
+void MonsterScript::updateEntityState(const entt::entity entity, State& state)
 {
-    // Previous state for transition logic
+    auto& registry = World::getInstance().registry;
+
+    // AI-driven state transitions
     const StateType previousState = state.currentState;
 
-    // State transitions
+    // Create AI input for state transitions
+    Input aiInput = {};
+    generateAIInput(entity, aiInput);
+
+    // State transitions based on AI input
     switch (previousState)
     {
     case Idle:
-        if (isMovingHorizontally(input))
+        if (aiInput.left || aiInput.right)
         {
             state.currentState = Moving;
         }
-        else if (input.up)
+        else if (aiInput.up)
         {
             state.currentState = Jump;
         }
-        else if (input.attack)
+        else if (aiInput.attack)
         {
             state.currentState = Attack;
         }
         break;
 
     case Moving:
-        if (!isMovingHorizontally(input))
+        if (!(aiInput.left || aiInput.right))
         {
             state.currentState = Idle;
         }
-        else if (input.up)
+        else if (aiInput.up)
         {
             state.currentState = Jump;
         }
-        else if (input.attack)
+        else if (aiInput.attack)
         {
             state.currentState = Attack;
         }
@@ -162,7 +207,7 @@ void PlayerScript::updateEntityState(const entt::entity entity, const Input& inp
     case Jump:
         if (isGrounded(entity))
         {
-            if (isMovingHorizontally(input))
+            if (aiInput.left || aiInput.right)
             {
                 state.currentState = Moving;
             }
@@ -176,7 +221,7 @@ void PlayerScript::updateEntityState(const entt::entity entity, const Input& inp
     case Falling:
         if (isGrounded(entity))
         {
-            if (isMovingHorizontally(input))
+            if (aiInput.left || aiInput.right)
             {
                 state.currentState = Moving;
             }
@@ -189,7 +234,7 @@ void PlayerScript::updateEntityState(const entt::entity entity, const Input& inp
 
     case Attack:
         // Attack state is temporary, return to previous state
-        if (isMovingHorizontally(input))
+        if (aiInput.left || aiInput.right)
         {
             state.currentState = Moving;
         }
@@ -220,11 +265,15 @@ void PlayerScript::updateEntityState(const entt::entity entity, const Input& inp
     }
 }
 
-void PlayerScript::applyStateBasedOutput(const State& state, const Input& input, Output& output, entt::entity entity)
+void MonsterScript::applyStateBasedOutput(const State& state, Output& output, entt::entity entity)
 {
     auto& registry = World::getInstance().registry;
     bool hasTransform = registry.all_of<Transform>(entity);
     Transform* transform = hasTransform ? &registry.get<Transform>(entity) : nullptr;
+
+    // Create AI input for movement
+    Input aiInput = {};
+    generateAIInput(entity, aiInput);
 
     switch (state.currentState)
     {
@@ -234,12 +283,12 @@ void PlayerScript::applyStateBasedOutput(const State& state, const Input& input,
 
     case Moving:
         // Apply horizontal movement force
-        if (input.left)
+        if (aiInput.left)
         {
             if (transform) transform->matrix.updateFlip(-1);
             output.force = {-MOVE_FORCE, 0};
         }
-        if (input.right)
+        if (aiInput.right)
         {
             if (transform) transform->matrix.updateFlip(1);
             output.force = {MOVE_FORCE, 0};
@@ -251,11 +300,11 @@ void PlayerScript::applyStateBasedOutput(const State& state, const Input& input,
         output.impulse = {0.0f, JUMP_IMPULSE};
 
         // Allow horizontal control during jump
-        if (input.left)
+        if (aiInput.left)
         {
             output.force = {-MOVE_FORCE * 0.8f, 0};
         }
-        if (input.right)
+        if (aiInput.right)
         {
             output.force = {MOVE_FORCE * 0.8f, 0};
         }
@@ -263,11 +312,11 @@ void PlayerScript::applyStateBasedOutput(const State& state, const Input& input,
 
     case Falling:
         // Allow some horizontal control during fall
-        if (input.left)
+        if (aiInput.left)
         {
             output.force = {-MOVE_FORCE * 0.5f, 0};
         }
-        if (input.right)
+        if (aiInput.right)
         {
             output.force = {MOVE_FORCE * 0.5f, 0};
         }
@@ -275,23 +324,22 @@ void PlayerScript::applyStateBasedOutput(const State& state, const Input& input,
 
     case Attack:
         // Apply a small force in the attack direction for visual effect
-        if (input.left)
+        if (aiInput.left)
         {
             output.force = {-ATTACK_FORCE, 0};
         }
-        else if (input.right)
+        else if (aiInput.right)
         {
             output.force = {ATTACK_FORCE, 0};
         }
         break;
 
     case Hurt:
-        // No player control during hurt state
+        // No control during hurt state
         break;
 
     case Dead:
-        // No player control during dead state
+        // No control during dead state
         break;
     }
 }
-

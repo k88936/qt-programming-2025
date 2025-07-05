@@ -7,8 +7,8 @@
 #include <qevent.h>
 
 #include "QRenderer2D.h"
-#include "Events/KeyEvents.h"
-#include "Managers/EventManager.h"
+#include "../Events/KeyEvents.h"
+#include "../Managers/EventManager.h"
 
 
 class Scene final : public QRenderer2D {

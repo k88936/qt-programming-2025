@@ -5,9 +5,9 @@
 #include "Scene.h"
 
 #include "World.h"
-#include "Components/Drawable.h"
-#include "Components/Transform.h"
-#include "Events/KeyEvents.h"
+#include "../Components/Drawable.h"
+#include "../Components/Transform.h"
+#include "../Events/KeyEvents.h"
 
 void Scene::render(SpiritBatch& batch)
 {
