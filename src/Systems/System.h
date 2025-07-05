@@ -9,7 +9,8 @@
 
 template<typename S>
 class System : public Singleton<S>{
-    virtual void update()=0;
+    virtual void update(){};
+    virtual void init(){};
 };
 
 #endif //SYSTEM_H

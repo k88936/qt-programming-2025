@@ -11,6 +11,7 @@ add_subdirectory(box2d)
 add_subdirectory(QRenderer2D)
 add_subdirectory(entt)
 add_subdirectory(enkiTS)
+add_subdirectory(preprocessor)
 find_package(Qt6 COMPONENTS
         Core
         Gui
@@ -22,7 +23,7 @@ add_executable(lucknight src/main.cpp
         src/Managers/EventManager.cpp
         src/Managers/TextureManager.cpp
         src/Systems/KeyboardControlSystem.cpp
-        src/Systems/AnimatorSystem.cpp
+        src/Systems/AnimationSystem.cpp
         src/Core/World.cpp
         src/Prefab/Prefab.cpp
         src/Prefab/Player.cpp
@@ -30,6 +31,9 @@ add_executable(lucknight src/main.cpp
         src/Systems/PhysicsSystem.cpp
         src/Systems/ScriptSystem.cpp
         src/Scripts/PlayerScript.cpp
+        src/Utils/Registerable.h
+        src/Scripts/StateMachine/StateMachine.h
+        src/Utils/Subscriber.h
 )
 target_link_libraries(lucknight
 
@@ -37,6 +41,7 @@ target_link_libraries(lucknight
         Qt::Gui
         Qt::Widgets
 
+        boost_preprocessor
         QRenderer2D
         box2d::box2d
         EnTT::EnTT

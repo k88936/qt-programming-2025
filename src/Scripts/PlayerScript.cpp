@@ -7,291 +7,66 @@
 #include "../Managers/EventManager.h"
 #include "../Components/Transform.h"
 
-#include <iostream>
-
 PlayerScript::PlayerScript()
 {
-    // Subscribe to ground contact events
-    EventManager::getInstance().dispatcher.sink<GroundContactEvent>().connect<&PlayerScript::handleGroundContact>(this);
 }
 
 PlayerScript::~PlayerScript()
 {
-    // Disconnect from events when script is destroyed
-    EventManager::getInstance().dispatcher.sink<GroundContactEvent>().disconnect<&PlayerScript::handleGroundContact>(this);
 }
 
-void PlayerScript::update(entt::entity entity)
+void PlayerScript::update(const entt::entity entity)
 {
-    auto& registry = World::getInstance().registry;
-
-    // Only process entities with required components
-    if (!registry.all_of<Input, Output, State>(entity)) {
-        return;
-    }
-
-    // Get components
-    const auto& input = registry.get<Input>(entity);
-    auto& output = registry.get<Output>(entity);
-    auto& state = registry.get<State>(entity);
-
+    Script::update(entity);
     // Reset output forces/impulses
-    output.reset();
-
+    componentOutput->reset();
     // Update entity state based on input and current conditions
-    updateEntityState(entity, input, state);
+    stateMachine.update();
 
-    // Apply output based on current state
-    applyStateBasedOutput(state, input, output, entity);
-}
-
-void PlayerScript::handleGroundContact(const GroundContactEvent& event)
-{
-    // Update grounded status in our tracking map
-    groundedEntities[event.entity] = event.inContact;
-
-    // If entity has a State component, update it appropriately
-    auto& registry = World::getInstance().registry;
-    if (registry.all_of<State>(event.entity))
+    //jump
+    if (componentInput->up)
     {
-        auto& state = registry.get<State>(event.entity);
-
-        // If entity just landed on ground
-        if (event.inContact && (state.currentState == Jump || state.currentState == Falling))
-        {
-            // Land on ground - transition to idle or moving based on input
-            if (registry.all_of<Input>(event.entity))
-            {
-                const auto& input = registry.get<Input>(event.entity);
-                StateType currentState = state.currentState;
-
-                if (isMovingHorizontally(input))
-                {
-                    state.currentState = Moving;
-                }
-                else
-                {
-                    state.currentState = Idle;
-                }
-
-                // Emit state change event
-                EventManager::getInstance().dispatcher.enqueue<StateChangeEvent>(
-                    StateChangeEvent{.entity = event.entity, 
-                                     .previousState = currentState, 
-                                     .newState = state.currentState, 
-                    });
-            }
-            else
-            {
-                state.currentState = Idle;
-            }
-        }
-        // If entity just left the ground and isn't jumping
-        else if (!event.inContact && state.currentState != Jump)
-        {
-            StateType currentState = state.currentState;
-            state.currentState = Falling;
-
-            // Emit state change event
-            EventManager::getInstance().dispatcher.enqueue<StateChangeEvent>(
-                StateChangeEvent{.entity = event.entity, 
-                                 .previousState = currentState, 
-                                 .newState = state.currentState, 
-                });
-        }
+        componentOutput->impulse={0, JUMP_IMPULSE};
     }
 }
 
-bool PlayerScript::isGrounded(entt::entity entity)
+void PlayerScript::init(entt::entity entity)
 {
-    // Check if entity is in our tracking map and is grounded
-    auto it = groundedEntities.find(entity);
-    if (it != groundedEntities.end())
-    {
-        return it->second;
-    }
-
-    // Default to true for entities we're not tracking yet
-    groundedEntities[entity] = true;
-    return true;
+    Script::init(entity);
+    stateMachine.init<PlayerStateMachine::Idle>(this);
 }
 
-bool PlayerScript::isMovingHorizontally(const Input& input)
+
+void PlayerScript::PlayerStateMachine::Idle::onUpdate(StateMachine<PlayerScript>* const stateMachine,
+                                                      PlayerScript* const param)
 {
-    return input.left || input.right;
-}
-
-void PlayerScript::updateEntityState(const entt::entity entity, const Input& input, State& state)
-{
-    // Previous state for transition logic
-    const StateType previousState = state.currentState;
-
-    // State transitions
-    switch (previousState)
+    StateBase::onUpdate(stateMachine, param);
+    if (param->componentInput->left || param->componentInput->right)
     {
-    case Idle:
-        if (isMovingHorizontally(input))
-        {
-            state.currentState = Moving;
-        }
-        else if (input.up)
-        {
-            state.currentState = Jump;
-        }
-        else if (input.attack)
-        {
-            state.currentState = Attack;
-        }
-        break;
-
-    case Moving:
-        if (!isMovingHorizontally(input))
-        {
-            state.currentState = Idle;
-        }
-        else if (input.up)
-        {
-            state.currentState = Jump;
-        }
-        else if (input.attack)
-        {
-            state.currentState = Attack;
-        }
-        break;
-
-    case Jump:
-        if (isGrounded(entity))
-        {
-            if (isMovingHorizontally(input))
-            {
-                state.currentState = Moving;
-            }
-            else
-            {
-                state.currentState = Idle;
-            }
-        }
-        break;
-
-    case Falling:
-        if (isGrounded(entity))
-        {
-            if (isMovingHorizontally(input))
-            {
-                state.currentState = Moving;
-            }
-            else
-            {
-                state.currentState = Idle;
-            }
-        }
-        break;
-
-    case Attack:
-        // Attack state is temporary, return to previous state
-        if (isMovingHorizontally(input))
-        {
-            state.currentState = Moving;
-        }
-        else
-        {
-            state.currentState = Idle;
-        }
-        break;
-
-    case Hurt:
-        // Hurt state is temporary, return to idle after a short time
-        state.currentState = Idle;
-        break;
-
-    case Dead:
-        // Dead state is terminal, no transitions out
-        break;
-    }
-
-    // If state changed, emit a state change event
-    if (previousState != state.currentState)
-    {
-        EventManager::getInstance().dispatcher.trigger<StateChangeEvent>(
-            StateChangeEvent{.entity = entity, 
-                             .previousState = previousState, 
-                             .newState = state.currentState, 
-            });
+        stateMachine->switchState<PlayerStateMachine::Moving>();
     }
 }
 
-void PlayerScript::applyStateBasedOutput(const State& state, const Input& input, Output& output, entt::entity entity)
+void PlayerScript::PlayerStateMachine::Moving::onUpdate(StateMachine<PlayerScript>* const stateMachine,
+                                                        PlayerScript* const param)
 {
-    auto& registry = World::getInstance().registry;
-    bool hasTransform = registry.all_of<Transform>(entity);
-    Transform* transform = hasTransform ? &registry.get<Transform>(entity) : nullptr;
-
-    switch (state.currentState)
+    StateBase::onUpdate(stateMachine, param);
+    if (param->componentInput->left)
     {
-    case Idle:
-        // No forces in idle state
-        break;
-
-    case Moving:
-        // Apply horizontal movement force
-        if (input.left)
-        {
-            if (transform) transform->matrix.updateFlip(-1);
-            output.force = {-MOVE_FORCE, 0};
-        }
-        if (input.right)
-        {
-            if (transform) transform->matrix.updateFlip(1);
-            output.force = {MOVE_FORCE, 0};
-        }
-        break;
-
-    case Jump:
-        // Apply jump impulse
-        output.impulse = {0.0f, JUMP_IMPULSE};
-
-        // Allow horizontal control during jump
-        if (input.left)
-        {
-            output.force = {-MOVE_FORCE * 0.8f, 0};
-        }
-        if (input.right)
-        {
-            output.force = {MOVE_FORCE * 0.8f, 0};
-        }
-        break;
-
-    case Falling:
-        // Allow some horizontal control during fall
-        if (input.left)
-        {
-            output.force = {-MOVE_FORCE * 0.5f, 0};
-        }
-        if (input.right)
-        {
-            output.force = {MOVE_FORCE * 0.5f, 0};
-        }
-        break;
-
-    case Attack:
-        // Apply a small force in the attack direction for visual effect
-        if (input.left)
-        {
-            output.force = {-ATTACK_FORCE, 0};
-        }
-        else if (input.right)
-        {
-            output.force = {ATTACK_FORCE, 0};
-        }
-        break;
-
-    case Hurt:
-        // No player control during hurt state
-        break;
-
-    case Dead:
-        // No player control during dead state
-        break;
+        param->componentTransform->matrix.updateFlip(-1);
+        param->componentOutput->force = {-MOVE_FORCE, 0};
+    }else if (param->componentInput->right)
+    {
+        param->componentTransform->matrix.updateFlip(1);
+        param->componentOutput->force = {MOVE_FORCE, 0};
+    }else
+    {
+        stateMachine->switchState<PlayerStateMachine::Moving>();
     }
 }
 
+void PlayerScript::PlayerStateMachine::Dead::onEnter(StateMachine<PlayerScript>* const stateMachine,
+                                                     PlayerScript* const param)
+{
+    StateBase::onEnter(stateMachine, param);
+}

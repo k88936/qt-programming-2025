@@ -12,13 +12,12 @@
 #include "../Components/Output.h"
 #include "../Components/PhysicsDesciption.h"
 #include "../Components/State.h"
-#include "../Components/Animation.h"
+#include "../Components/Animator.h"
 #include "../Components/Tags.h"
-#include "../Events/BodyEvents.h"
 #include "../Events/KeyEvents.h"
 #include "../Managers/EventManager.h"
 #include "../Scripts/PlayerScript.h"
-#include "../Systems/AnimatorSystem.h"
+#include "../Systems/AnimationSystem.h"
 
 struct Input;
 struct Keymap;
@@ -48,7 +47,7 @@ entt::entity Player::build(const Matrix& transform)
     // Add state and rendering components
     registry.emplace<State>(entity);
     registry.emplace<Drawable>(entity, Drawable{.texture = nullptr});
-    registry.emplace<Animation>(entity);
+    registry.emplace<Animator>(entity);
     registry.emplace<PlayerScript>(entity);
     initializeAnimations(entity);
 
@@ -58,7 +57,7 @@ entt::entity Player::build(const Matrix& transform)
 void Player::initializeAnimations(entt::entity entity)
 {
     // Get the animator system instance
-    auto& animator = AnimatorSystem::getInstance();
+    auto& animator = AnimationSystem::getInstance();
     // Register animations for different states
     animator.registerAnimation(entity, Idle, "assets/player/idle", 0.2f, true);
     animator.registerAnimation(entity, Moving, "assets/player/move", 0.15f, true);

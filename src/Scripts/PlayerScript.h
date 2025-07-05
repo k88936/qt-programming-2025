@@ -7,34 +7,43 @@
 #include "Script.h"
 #include "../Components/Input.h"
 #include "../Components/Output.h"
-#include "../Components/State.h"
-#include "../Events/StateEvents.h"
-#include <unordered_map>
 
-class PlayerScript final : public Script<PlayerScript>
+#include "../Components/Transform.h"
+#include "StateMachine/StateMachine.h"
+
+SCRIPT(PlayerScript, (Input)(Output)(Transform))
 {
 public:
+
     PlayerScript();
-    ~PlayerScript();
+    ~PlayerScript() override;
 
     void update(entt::entity entity) override;
+    void init(entt::entity) override;
 
-    // Event handling
-    void handleGroundContact(const GroundContactEvent& event);
 
-private:
     // Movement constants
     static constexpr float MOVE_FORCE = 25.0f;
     static constexpr float JUMP_IMPULSE = 25.0f;
     static constexpr float ATTACK_FORCE = 10.0f;
 
-    // Track which entities are grounded
-    std::unordered_map<entt::entity, bool> groundedEntities;
+    class PlayerStateMachine : public StateMachine<PlayerScript>
+    {
+    public:
+        class Idle final : public PlayerStateMachine::StateBase
+        {
+            void onUpdate(StateMachine<PlayerScript>* const stateMachine, PlayerScript* const param) override;
+        };
 
-    // Helper methods
-    bool isGrounded(entt::entity entity);
-    bool isMovingHorizontally(const Input& input);
-    void updateEntityState(entt::entity entity, const Input& input, State& state);
-    void applyStateBasedOutput(const State& state, const Input& input, Output& output, entt::entity entity);
+        class Moving final : public PlayerStateMachine::StateBase
+        {
+            void onUpdate(StateMachine<PlayerScript>* const stateMachine, PlayerScript* const param) override;
+        };
+
+        class Dead final : public PlayerStateMachine::StateBase
+        {
+            void onEnter(StateMachine<PlayerScript>* const stateMachine, PlayerScript* const param) override;
+        };
+    } stateMachine;
 };
 #endif //PLAYERSCRIPT_H

@@ -6,5 +6,6 @@
     <mapping directory="$PROJECT_DIR$/box2d" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/enkiTS" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/entt" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/preprocessor" vcs="Git" />
   </component>
 </project>

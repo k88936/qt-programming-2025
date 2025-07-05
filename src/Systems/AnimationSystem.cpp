@@ -2,7 +2,7 @@
 // Created on 7/4/25.
 //
 
-#include "AnimatorSystem.h"
+#include "AnimationSystem.h"
 #include "../Managers/TextureManager.h"
 #include  "../Managers/EventManager.h"
 #include "../Components/Drawable.h"
@@ -19,20 +19,20 @@ long getCurrentTimeMilliseconds()
     return millis;
 }
 
-AnimatorSystem::AnimatorSystem()
+AnimationSystem::AnimationSystem()
 {
     // Subscribe to state change events
-    EventManager::getInstance().dispatcher.sink<StateChangeEvent>().connect<&AnimatorSystem::onStateChange>(this);
+    EventManager::getInstance().dispatcher.sink<StateChangeEvent>().connect<&AnimationSystem::onStateChange>(this);
     lastUpdateTime = getCurrentTimeMilliseconds();
 }
 
-AnimatorSystem::~AnimatorSystem()
+AnimationSystem::~AnimationSystem()
 {
     // Disconnect from state change events
-    EventManager::getInstance().dispatcher.sink<StateChangeEvent>().disconnect<&AnimatorSystem::onStateChange>(this);
+    EventManager::getInstance().dispatcher.sink<StateChangeEvent>().disconnect<&AnimationSystem::onStateChange>(this);
 }
 
-void AnimatorSystem::update()
+void AnimationSystem::update()
 {
     // Calculate delta time
     const long currentTime = getCurrentTimeMilliseconds();
@@ -40,9 +40,9 @@ void AnimatorSystem::update()
     lastUpdateTime = currentTime;
 
     auto& registry = World::getInstance().registry;
-    auto view = registry.view<Animation, Drawable>();
+    auto view = registry.view<Animator, Drawable>();
 
-    view.each([this, deltaTime](auto entity, Animation& anim, Drawable& drawable)
+    view.each([this, deltaTime](auto entity, Animator& anim, Drawable& drawable)
     {
         // First ensure entity has a texture if animations are available
         if (drawable.texture == nullptr && !anim.stateAnimations.empty())
@@ -80,7 +80,7 @@ void AnimatorSystem::update()
     });
 }
 
-bool AnimatorSystem::registerAnimation(entt::entity entity, StateType state,
+bool AnimationSystem::registerAnimation(entt::entity entity, StateType state,
                                        const std::string& basePath,
                                        float frameDuration, bool loop)
 {
@@ -97,12 +97,12 @@ bool AnimatorSystem::registerAnimation(entt::entity entity, StateType state,
     }
 
     // Ensure entity has Animation component
-    if (!registry.all_of<Animation>(entity))
+    if (!registry.all_of<Animator>(entity))
     {
-        registry.emplace<Animation>(entity);
+        registry.emplace<Animator>(entity);
     }
 
-    auto& anim = registry.get<Animation>(entity);
+    auto& anim = registry.get<Animator>(entity);
 
     // Get frame count from TextureManager
     int frameCount = TextureManager::getInstance().getTextureCount(basePath);
@@ -113,7 +113,7 @@ bool AnimatorSystem::registerAnimation(entt::entity entity, StateType state,
     }
 
     // Create animation clip
-    const AnimationClip clip(getAnimationNameForState(state), basePath, frameCount, frameDuration, loop);
+    const Clip clip(getAnimationNameForState(state), basePath, frameCount, frameDuration, loop);
 
     // Register the animation
     anim.stateAnimations[state] = clip;
@@ -136,15 +136,15 @@ bool AnimatorSystem::registerAnimation(entt::entity entity, StateType state,
     return true;
 }
 
-void AnimatorSystem::play(entt::entity entity, const std::string& stateName)
+void AnimationSystem::play(entt::entity entity, const std::string& stateName)
 {
     auto& registry = World::getInstance().registry;
-    if (!registry.all_of<Animation>(entity))
+    if (!registry.all_of<Animator>(entity))
     {
         return;
     }
 
-    auto& anim = registry.get<Animation>(entity);
+    auto& anim = registry.get<Animator>(entity);
 
     // Find the animation by state name
     StateType targetState;
@@ -188,59 +188,59 @@ void AnimatorSystem::play(entt::entity entity, const std::string& stateName)
     }
 }
 
-void AnimatorSystem::stop(entt::entity entity)
+void AnimationSystem::stop(entt::entity entity)
 {
     auto& registry = World::getInstance().registry;
-    if (!registry.all_of<Animation>(entity))
+    if (!registry.all_of<Animator>(entity))
     {
         return;
     }
 
-    auto& anim = registry.get<Animation>(entity);
+    auto& anim = registry.get<Animator>(entity);
     anim.current.isPlaying = false;
 }
 
-void AnimatorSystem::setSpeed(entt::entity entity, float speedMultiplier)
+void AnimationSystem::setSpeed(entt::entity entity, float speedMultiplier)
 {
     // Not implemented in this version
     // Would modify frameDuration of current clip
 }
 
-bool AnimatorSystem::isPlaying(entt::entity entity) const
+bool AnimationSystem::isPlaying(entt::entity entity) const
 {
     auto& registry = World::getInstance().registry;
-    if (!registry.all_of<Animation>(entity))
+    if (!registry.all_of<Animator>(entity))
     {
         return false;
     }
 
-    const auto& anim = registry.get<Animation>(entity);
+    const auto& anim = registry.get<Animator>(entity);
     return anim.current.isPlaying;
 }
 
-std::string AnimatorSystem::getCurrentAnimationName(entt::entity entity) const
+std::string AnimationSystem::getCurrentAnimationName(entt::entity entity) const
 {
     auto& registry = World::getInstance().registry;
-    if (!registry.all_of<Animation>(entity))
+    if (!registry.all_of<Animator>(entity))
     {
         return "";
     }
 
-    const auto& anim = registry.get<Animation>(entity);
+    const auto& anim = registry.get<Animator>(entity);
     return anim.current.clip ? anim.current.clip->name : "";
 }
 
-void AnimatorSystem::onStateChange(const StateChangeEvent& event)
+void AnimationSystem::onStateChange(const StateChangeEvent& event)
 {
     auto& registry = World::getInstance().registry;
 
     // Only handle entities with Animation component
-    if (!registry.all_of<Animation>(event.entity))
+    if (!registry.all_of<Animator>(event.entity))
     {
         return;
     }
 
-    auto& anim = registry.get<Animation>(event.entity);
+    auto& anim = registry.get<Animator>(event.entity);
 
     // Find animation for the new state
     auto it = anim.stateAnimations.find(event.newState);
@@ -300,7 +300,7 @@ void AnimatorSystem::onStateChange(const StateChangeEvent& event)
 //     }
 // }
 
-void AnimatorSystem::updateAnimation(entt::entity entity, Animation& anim, float deltaTime)
+void AnimationSystem::updateAnimation(entt::entity entity, Animator& anim, float deltaTime)
 {
     if (!anim.current.clip)
     {
@@ -339,7 +339,7 @@ void AnimatorSystem::updateAnimation(entt::entity entity, Animation& anim, float
     }
 }
 
-void AnimatorSystem::updateDrawableTexture(entt::entity entity, const Animation& anim)
+void AnimationSystem::updateDrawableTexture(entt::entity entity, const Animator& anim)
 {
     auto& registry = World::getInstance().registry;
     assert(registry.all_of<Drawable>(entity) && anim.current.clip);
@@ -356,7 +356,7 @@ void AnimatorSystem::updateDrawableTexture(entt::entity entity, const Animation&
     drawable.texture = texture;
 }
 
-std::string AnimatorSystem::getAnimationNameForState(StateType state)
+std::string AnimationSystem::getAnimationNameForState(StateType state)
 {
     switch (state)
     {

@@ -13,7 +13,6 @@
 #include "Components/Drawable.h"
 #include "Components/PhysicsDesciption.h"
 #include "Components/Transform.h"
-#include "Events/BodyEvents.h"
 #include "Prefab/Player.h"
 #include "Scripts/PlayerScript.h"
 #include "Systems/PhysicsSystem.h"
@@ -22,10 +21,6 @@ int main(int argc, char* argv[])
 {
     QApplication a(argc, argv);
 
-    Player p;
-    Matrix m;
-    m.translate(0,1);
-    p.build(m);
 
     Scene scene;
     scene.show();

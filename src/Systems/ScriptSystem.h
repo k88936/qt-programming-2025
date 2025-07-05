@@ -9,24 +9,36 @@
 
 class ScriptSystem final : public System<ScriptSystem>
 {
-    std::vector<std::function<void()>> scripts;
+    std::vector<std::function<void()>> updateScripts;
+    std::vector<std::function<void()>> initScripts;
 
 public:
-    template <typename S>
+    template <typename... S>
     void registerScript();
+    void init() override;
 
     void update() override;
 };
 
-template <typename S>
+template <typename... S>
 void ScriptSystem::registerScript()
 {
-    scripts.emplace_back([]()
+    using ScriptType = std::tuple_element_t<0, std::tuple<S...>>;
+    updateScripts.emplace_back([]()
     {
-        World::getInstance().registry.view<S>().each([](auto entity, S& script)
+        auto& registry = World::getInstance().registry;
+        for (const auto view = registry.view<S...>(); const auto entity : view)
         {
-            script.update(entity);
-        });
+            registry.get<ScriptType>(entity).update(entity);
+        }
+    });
+    initScripts.emplace_back([]()
+    {
+        auto& registry = World::getInstance().registry;
+        for (const auto view = registry.view<S...>(); const auto entity : view)
+        {
+            registry.get<ScriptType>(entity).init(entity);
+        }
     });
 }
 

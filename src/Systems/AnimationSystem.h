@@ -7,16 +7,15 @@
 
 #include "System.h"
 #include "../Core/World.h"
-#include "../Components/Animation.h"
+#include "../Components/Animator.h"
 #include "../Components/State.h"
-#include "../Events/StateEvents.h"
 #include <string>
 
-class AnimatorSystem final : public System<AnimatorSystem>
+class AnimationSystem final : public System<AnimationSystem>
 {
 public:
-    AnimatorSystem();
-    ~AnimatorSystem() override;
+    AnimationSystem();
+    ~AnimationSystem() override;
 
     void update() override;
 
@@ -45,10 +44,10 @@ public:
 
 private:
     // Update animation based on elapsed time
-    void updateAnimation(entt::entity entity, Animation& anim, float deltaTime);
+    void updateAnimation(entt::entity entity, Animator& anim, float deltaTime);
 
     // Update the drawable component with the current frame
-    void updateDrawableTexture(entt::entity entity, const Animation& anim);
+    void updateDrawableTexture(entt::entity entity, const Animator& anim);
 
     // Map state types to animation names
     static std::string getAnimationNameForState(StateType state);

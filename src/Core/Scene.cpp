@@ -26,13 +26,14 @@ void Scene::timerEvent(QTimerEvent* event)
 {
     if (event->timerId() == timer.timerId())
     {
-        World::getInstance().loop();
+        World::getInstance().update();
         flush();
     }
 }
 
 void Scene::startGameLoop()
 {
+    World::getInstance().init();
     timer.start(16, this);
 }
 

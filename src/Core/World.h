@@ -12,7 +12,8 @@ class World final : public Singleton<World>
 {
 public:
     entt::registry registry;
-    void loop();
+    void update();
+    void init();
 };
 
 
